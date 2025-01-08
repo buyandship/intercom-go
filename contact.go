@@ -9,8 +9,8 @@ type ContactService struct {
 
 // ContactList holds a list of Contacts and paging information
 type ContactList struct {
-	Pages    PageParams
-	Contacts []Contact
+	Pages       PageParams
+	Contacts    []Contact
 	ScrollParam string `json:"scroll_param,omitempty"`
 }
 
@@ -21,7 +21,7 @@ type Contact struct {
 	ID                     string                 `json:"id,omitempty"`
 	Email                  string                 `json:"email,omitempty"`
 	Phone                  string                 `json:"phone,omitempty"`
-	UserID                 string                 `json:"user_id,omitempty"`
+	ExternalID             string                 `json:"external_id,omitempty"`
 	Name                   string                 `json:"name,omitempty"`
 	Avatar                 *UserAvatar            `json:"avatar,omitempty"`
 	LocationData           *LocationData          `json:"location_data,omitempty"`
@@ -41,6 +41,28 @@ type Contact struct {
 	NewSession             *bool                  `json:"new_session,omitempty"`
 }
 
+type BasicContact struct {
+	Type       string `json:"type,omitempty"`
+	ID         string `json:"id,omitempty"`
+	ExternalID string `json:"external_id,omitempty"`
+	Phone      string `json:"phone,omitempty"`
+	Name       string `json:"name,omitempty"`
+}
+
+type Pagination struct {
+	Type       string `json:"type,omitempty"`
+	Page       int32  `json:"page,omitempty"`
+	PerPage    int32  `json:"per_page,omitempty"`
+	TotalPages int32  `json:"total_pages,omitempty"`
+}
+
+type SearchResponse struct {
+	Type       string         `json:"type,omitempty"`
+	Data       []BasicContact `json:"data,omitempty"`
+	TotalCount int64          `json:"total_count,omitempty"`
+	Page       Pagination     `json:"page,omitempty"`
+}
+
 type contactListParams struct {
 	PageParams
 	SegmentID string `url:"segment_id,omitempty"`
@@ -55,11 +77,23 @@ func (c *ContactService) FindByID(id string) (Contact, error) {
 
 // FindByUserID looks up a Contact by their UserID (automatically generated server side).
 func (c *ContactService) FindByUserID(userID string) (Contact, error) {
-	return c.findWithIdentifiers(UserIdentifiers{UserID: userID})
+	return c.findWithIdentifiers(UserIdentifiers{ExternalID: userID})
+}
+
+func (c *ContactService) SearchByExternalID(userID string) (BasicContact, error) {
+	return c.searchWithIdentifiers(ExternalQuery{Query: QueryStruct{
+		Field:    "external_id",
+		Operator: "=",
+		Value:    userID,
+	}})
 }
 
 func (c *ContactService) findWithIdentifiers(identifiers UserIdentifiers) (Contact, error) {
 	return c.Repository.find(identifiers)
+}
+
+func (c *ContactService) searchWithIdentifiers(externalQuery ExternalQuery) (BasicContact, error) {
+	return c.Repository.search(externalQuery)
 }
 
 // List all Contacts for App.
@@ -69,7 +103,7 @@ func (c *ContactService) List(params PageParams) (ContactList, error) {
 
 // List all Contacts for App via Scroll API
 func (c *ContactService) Scroll(scrollParam string) (ContactList, error) {
-       return c.Repository.scroll(scrollParam)
+	return c.Repository.scroll(scrollParam)
 }
 
 // ListByEmail looks up a list of Contacts by their Email.
@@ -113,10 +147,10 @@ func (c Contact) MessageAddress() MessageAddress {
 		Type:   "contact",
 		ID:     c.ID,
 		Email:  c.Email,
-		UserID: c.UserID,
+		UserID: c.ExternalID,
 	}
 }
 
 func (c Contact) String() string {
-	return fmt.Sprintf("[intercom] contact { id: %s name: %s, user_id: %s, email: %s }", c.ID, c.Name, c.UserID, c.Email)
+	return fmt.Sprintf("[intercom] contact { id: %s name: %s, external_id: %s, email: %s }", c.ID, c.Name, c.ExternalID, c.Email)
 }

@@ -5,12 +5,13 @@ import (
 	"errors"
 	"fmt"
 
-	"gopkg.in/intercom/intercom-go.v2/interfaces"
+	"github.com/buyandship/intercom-go/interfaces"
 )
 
 // ContactRepository defines the interface for working with Contacts through the API.
 type ContactRepository interface {
 	find(UserIdentifiers) (Contact, error)
+	search(ExternalQuery) (BasicContact, error)
 	list(contactListParams) (ContactList, error)
 	scroll(scrollParam string) (ContactList, error)
 	create(*Contact) (Contact, error)
@@ -28,11 +29,23 @@ func (api ContactAPI) find(params UserIdentifiers) (Contact, error) {
 	return unmarshalToContact(api.getClientForFind(params))
 }
 
+func (api ContactAPI) search(params ExternalQuery) (BasicContact, error) {
+	return unmarshalToBasicContact(api.searchContact(params))
+}
+
+func (api ContactAPI) searchContact(params ExternalQuery) ([]byte, error) {
+	resp, err := api.httpClient.Post("/contacts/search", params)
+	if err != nil {
+		return nil, err
+	}
+	return resp, nil
+}
+
 func (api ContactAPI) getClientForFind(params UserIdentifiers) ([]byte, error) {
 	switch {
 	case params.ID != "":
 		return api.httpClient.Get(fmt.Sprintf("/contacts/%s", params.ID), nil)
-	case params.UserID != "":
+	case params.ExternalID != "":
 		return api.httpClient.Get("/contacts", params)
 	}
 	return nil, errors.New("Missing Contact Identifier")
@@ -49,14 +62,14 @@ func (api ContactAPI) list(params contactListParams) (ContactList, error) {
 }
 
 func (api ContactAPI) scroll(scrollParam string) (ContactList, error) {
-       contactList := ContactList{}
-       params := scrollParams{ ScrollParam: scrollParam }
-       data, err := api.httpClient.Get("/contacts/scroll", params)
-       if err != nil {
-               return contactList, err
-       }
-       err = json.Unmarshal(data, &contactList)
-       return contactList, err
+	contactList := ContactList{}
+	params := scrollParams{ScrollParam: scrollParam}
+	data, err := api.httpClient.Get("/contacts/scroll", params)
+	if err != nil {
+		return contactList, err
+	}
+	err = json.Unmarshal(data, &contactList)
+	return contactList, err
 }
 
 func (api ContactAPI) create(contact *Contact) (Contact, error) {
@@ -72,7 +85,7 @@ func (api ContactAPI) update(contact *Contact) (Contact, error) {
 func (api ContactAPI) convert(contact *Contact, user *User) (User, error) {
 	cr := convertRequest{Contact: api.buildRequestContact(contact), User: requestUser{
 		ID:         user.ID,
-		UserID:     user.UserID,
+		ExternalID: user.ExternalID,
 		Email:      user.Email,
 		SignedUpAt: user.SignedUpAt,
 	}}
@@ -103,12 +116,26 @@ func unmarshalToContact(data []byte, err error) (Contact, error) {
 	return savedContact, err
 }
 
+func unmarshalToBasicContact(data []byte, err error) (BasicContact, error) {
+	resp := SearchResponse{}
+	if err != nil {
+		return BasicContact{}, err
+	}
+	if err := json.Unmarshal(data, &resp); err != nil {
+		return BasicContact{}, err
+	}
+	if resp.TotalCount != 1 {
+		return BasicContact{}, fmt.Errorf("unexpected number of results: %d", resp.TotalCount)
+	}
+	return resp.Data[0], nil
+}
+
 func (api ContactAPI) buildRequestContact(contact *Contact) requestUser {
 	return requestUser{
 		ID:                     contact.ID,
 		Email:                  contact.Email,
 		Phone:                  contact.Phone,
-		UserID:                 contact.UserID,
+		ExternalID:             contact.ExternalID,
 		Name:                   contact.Name,
 		LastRequestAt:          contact.LastRequestAt,
 		LastSeenIP:             contact.LastSeenIP,

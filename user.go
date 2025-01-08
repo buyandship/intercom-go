@@ -9,8 +9,8 @@ type UserService struct {
 
 // UserList holds a list of Users and paging information
 type UserList struct {
-	Pages PageParams
-	Users []User
+	Pages       PageParams
+	Users       []User
 	ScrollParam string `json:"scroll_param,omitempty"`
 }
 
@@ -21,7 +21,7 @@ type User struct {
 	ID                     string                 `json:"id,omitempty"`
 	Email                  string                 `json:"email,omitempty"`
 	Phone                  string                 `json:"phone,omitempty"`
-	UserID                 string                 `json:"user_id,omitempty"`
+	ExternalID             string                 `json:"ExternalID,omitempty"`
 	Anonymous              *bool                  `json:"anonymous,omitempty"`
 	Name                   string                 `json:"name,omitempty"`
 	Pseudonym              string                 `json:"pseudonym,omitempty"`
@@ -74,14 +74,24 @@ type SocialProfile struct {
 
 // UserIdentifiers are used to identify Users in Intercom.
 type UserIdentifiers struct {
-	ID     string `url:"-"`
-	UserID string `url:"user_id,omitempty"`
-	Email  string `url:"email,omitempty"`
+	ID         string `url:"-"`
+	ExternalID string `url:"external_id,omitempty"`
+	Email      string `url:"email,omitempty"`
+}
+
+type ExternalQuery struct {
+	Query QueryStruct `json:"query,omitempty"`
+}
+
+type QueryStruct struct {
+	Field    string `json:"field,omitempty"`
+	Operator string `json:"operator,omitempty"`
+	Value    string `json:"value,omitempty"`
 }
 
 // UserAvatar represents an avatar for a User.
 type UserAvatar struct {
-	Type string `json:"type,omitempty"`
+	Type     string `json:"type,omitempty"`
 	ImageURL string `json:"image_url,omitempty"`
 }
 
@@ -92,7 +102,7 @@ type userListParams struct {
 }
 
 type scrollParams struct {
-	ScrollParam  string `url:"scroll_param,omitempty"`
+	ScrollParam string `url:"scroll_param,omitempty"`
 }
 
 // FindByID looks up a User by their Intercom ID.
@@ -102,7 +112,7 @@ func (u *UserService) FindByID(id string) (User, error) {
 
 // FindByUserID looks up a User by their UserID (customer supplied).
 func (u *UserService) FindByUserID(userID string) (User, error) {
-	return u.findWithIdentifiers(UserIdentifiers{UserID: userID})
+	return u.findWithIdentifiers(UserIdentifiers{ExternalID: userID})
 }
 
 // FindByEmail looks up a User by their Email.
@@ -121,7 +131,7 @@ func (u *UserService) List(params PageParams) (UserList, error) {
 
 // List all Users for App via Scroll API
 func (u *UserService) Scroll(scrollParam string) (UserList, error) {
-       return u.Repository.scroll(scrollParam)
+	return u.Repository.scroll(scrollParam)
 }
 
 // List Users by Segment.
@@ -149,12 +159,12 @@ func (u User) MessageAddress() MessageAddress {
 		Type:   "user",
 		ID:     u.ID,
 		Email:  u.Email,
-		UserID: u.UserID,
+		UserID: u.ExternalID,
 	}
 }
 
 func (u User) String() string {
-	return fmt.Sprintf("[intercom] user { id: %s name: %s, user_id: %s, email: %s }", u.ID, u.Name, u.UserID, u.Email)
+	return fmt.Sprintf("[intercom] user { id: %s name: %s, user_id: %s, email: %s }", u.ID, u.Name, u.ExternalID, u.Email)
 }
 
 func (l LocationData) String() string {

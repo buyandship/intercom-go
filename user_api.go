@@ -5,7 +5,7 @@ import (
 	"errors"
 	"fmt"
 
-	"gopkg.in/intercom/intercom-go.v2/interfaces"
+	"github.com/buyandship/intercom-go/interfaces"
 )
 
 // UserRepository defines the interface for working with Users through the API.
@@ -23,13 +23,13 @@ type UserAPI struct {
 }
 
 type requestScroll struct {
-	ScrollParam            string                 `json:"scroll_param,omitempty"`
+	ScrollParam string `json:"scroll_param,omitempty"`
 }
 type requestUser struct {
 	ID                     string                 `json:"id,omitempty"`
 	Email                  string                 `json:"email,omitempty"`
 	Phone                  string                 `json:"phone,omitempty"`
-	UserID                 string                 `json:"user_id,omitempty"`
+	ExternalID             string                 `json:"external_id,omitempty"`
 	Name                   string                 `json:"name,omitempty"`
 	SignedUpAt             int64                  `json:"signed_up_at,omitempty"`
 	RemoteCreatedAt        int64                  `json:"remote_created_at,omitempty"`
@@ -51,7 +51,7 @@ func (api UserAPI) getClientForFind(params UserIdentifiers) ([]byte, error) {
 	switch {
 	case params.ID != "":
 		return api.httpClient.Get(fmt.Sprintf("/users/%s", params.ID), nil)
-	case params.UserID != "", params.Email != "":
+	case params.ExternalID != "", params.Email != "":
 		return api.httpClient.Get("/users", params)
 	}
 	return nil, errors.New("Missing User Identifier")
@@ -68,17 +68,17 @@ func (api UserAPI) list(params userListParams) (UserList, error) {
 }
 
 func (api UserAPI) scroll(scrollParam string) (UserList, error) {
-       userList := UserList{}
+	userList := UserList{}
 
-       url := "/users/scroll"
-       params := scrollParams{ ScrollParam: scrollParam }
-       data, err := api.httpClient.Get(url, params)
+	url := "/users/scroll"
+	params := scrollParams{ScrollParam: scrollParam}
+	data, err := api.httpClient.Get(url, params)
 
-       if err != nil {
-               return userList, err
-       }
-       err = json.Unmarshal(data, &userList)
-       return userList, err
+	if err != nil {
+		return userList, err
+	}
+	err = json.Unmarshal(data, &userList)
+	return userList, err
 }
 
 func (api UserAPI) save(user *User) (User, error) {

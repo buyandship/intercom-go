@@ -20,7 +20,7 @@ func TestUserFindByEmail(t *testing.T) {
 
 func TestUserFindByUserID(t *testing.T) {
 	user, _ := (&UserService{Repository: TestUserAPI{t: t}}).FindByUserID("134d")
-	if user.UserID != "134d" {
+	if user.ExternalID != "134d" {
 		t.Errorf("User not found")
 	}
 }
@@ -44,7 +44,7 @@ func TestUserDelete(t *testing.T) {
 }
 
 func TestUserMessageAddress(t *testing.T) {
-	contact := User{ID: "46adad3f09126dca", UserID: "aaaa", Email: "some@email.com"}
+	contact := User{ID: "46adad3f09126dca", ExternalID: "aaaa", Email: "some@email.com"}
 	address := contact.MessageAddress()
 	if address.ID != "46adad3f09126dca" {
 		t.Errorf("User address had wrong ID")
@@ -65,15 +65,15 @@ type TestUserAPI struct {
 }
 
 func (t TestUserAPI) find(params UserIdentifiers) (User, error) {
-	return User{ID: params.ID, Email: params.Email, UserID: params.UserID}, nil
+	return User{ID: params.ID, Email: params.Email, ExternalID: params.ExternalID}, nil
 }
 
 func (t TestUserAPI) list(params userListParams) (UserList, error) {
-	return UserList{Users: []User{User{ID: "46adad3f09126dca", Email: "jamie@example.io", UserID: "aa123"}}}, nil
+	return UserList{Users: []User{User{ID: "46adad3f09126dca", Email: "jamie@example.io", ExternalID: "aa123"}}}, nil
 }
 
 func (t TestUserAPI) scroll(scrollParam string) (UserList, error) {
-	return UserList{Users: []User{User{ID: "46adad3f09126dca", Email: "jamie@example.io", UserID: "aa123"}}}, nil
+	return UserList{Users: []User{User{ID: "46adad3f09126dca", Email: "jamie@example.io", ExternalID: "aa123"}}}, nil
 }
 
 func (t TestUserAPI) save(user *User) (User, error) {

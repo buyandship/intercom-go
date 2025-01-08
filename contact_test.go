@@ -15,7 +15,7 @@ func TestContactFindByID(t *testing.T) {
 
 func TestContactFindByUserID(t *testing.T) {
 	contact, _ := (&ContactService{Repository: TestContactAPI{t: t}}).FindByUserID("134d")
-	if contact.UserID != "134d" {
+	if contact.ExternalID != "134d" {
 		t.Errorf("Contact not found")
 	}
 }
@@ -56,25 +56,25 @@ func TestContactUpdate(t *testing.T) {
 
 func TestContactConvert(t *testing.T) {
 	contactService := ContactService{Repository: TestContactAPI{t: t}}
-	contact := Contact{UserID: "aaaa", Email: "some@email.com"}
-	user := User{ID: "abc13", UserID: "c135"}
+	contact := Contact{ExternalID: "aaaa", Email: "some@email.com"}
+	user := User{ID: "abc13", ExternalID: "c135"}
 	u, _ := contactService.Convert(&contact, &user)
 	if u.Email != contact.Email {
 		t.Errorf("expected returned user to have email %s, got %s", contact.Email, u.Email)
 	}
-	if u.UserID != user.UserID {
-		t.Errorf("expected returned user to have user id %s, got %s", user.UserID, u.UserID)
+	if u.ExternalID != user.ExternalID {
+		t.Errorf("expected returned user to have user id %s, got %s", user.ExternalID, u.ExternalID)
 	}
 }
 
 func TestContactDelete(t *testing.T) {
 	contactService := ContactService{Repository: TestContactAPI{t: t}}
-	contact := Contact{UserID: "aaaa", Email: "some@email.com"}
+	contact := Contact{ExternalID: "aaaa", Email: "some@email.com"}
 	contactService.Delete(&contact)
 }
 
 func TestContactMessageAddress(t *testing.T) {
-	contact := Contact{UserID: "aaaa", Email: "some@email.com"}
+	contact := Contact{ExternalID: "aaaa", Email: "some@email.com"}
 	address := contact.MessageAddress()
 	if address.ID != "" {
 		t.Errorf("Contact address had ID")
@@ -95,27 +95,31 @@ type TestContactAPI struct {
 }
 
 func (t TestContactAPI) find(params UserIdentifiers) (Contact, error) {
-	return Contact{ID: params.ID, Email: params.Email, UserID: params.UserID}, nil
+	return Contact{ID: params.ID, Email: params.Email, ExternalID: params.ExternalID}, nil
+}
+
+func (t TestContactAPI) search(params ExternalQuery) (BasicContact, error) {
+	return BasicContact{}, nil
 }
 
 func (t TestContactAPI) list(params contactListParams) (ContactList, error) {
-	return ContactList{Contacts: []Contact{Contact{ID: "46adad3f09126dca", Email: "jamie@example.io", UserID: "aa123"}}}, nil
+	return ContactList{Contacts: []Contact{Contact{ID: "46adad3f09126dca", Email: "jamie@example.io", ExternalID: "aa123"}}}, nil
 }
 
 func (t TestContactAPI) scroll(scrollParam string) (ContactList, error) {
-	return ContactList{Contacts: []Contact{Contact{ID: "46adad3f09126dca", Email: "jamie@example.io", UserID: "aa123"}}}, nil
+	return ContactList{Contacts: []Contact{Contact{ID: "46adad3f09126dca", Email: "jamie@example.io", ExternalID: "aa123"}}}, nil
 }
 
 func (t TestContactAPI) create(c *Contact) (Contact, error) {
-	return Contact{ID: c.ID, Email: c.Email, UserID: uuid.New()}, nil
+	return Contact{ID: c.ID, Email: c.Email, ExternalID: uuid.New()}, nil
 }
 
 func (t TestContactAPI) update(c *Contact) (Contact, error) {
-	return Contact{ID: c.ID, Email: c.Email, UserID: c.UserID}, nil
+	return Contact{ID: c.ID, Email: c.Email, ExternalID: c.ExternalID}, nil
 }
 
 func (t TestContactAPI) convert(c *Contact, u *User) (User, error) {
-	return User{ID: u.ID, Email: c.Email, UserID: u.UserID}, nil
+	return User{ID: u.ID, Email: c.Email, ExternalID: u.ExternalID}, nil
 }
 
 func (t TestContactAPI) delete(id string) (Contact, error) {

@@ -92,7 +92,7 @@ func (c *ConversationService) ListByUser(user *User, state ConversationListState
 		PageParams:     pageParams,
 		Type:           "user",
 		IntercomUserID: user.ID,
-		UserID:         user.UserID,
+		UserID:         user.ExternalID,
 		Email:          user.Email,
 	}
 	if state == SHOW_UNREAD {

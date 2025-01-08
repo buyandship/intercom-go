@@ -1,7 +1,7 @@
 package intercom
 
 import (
-	"gopkg.in/intercom/intercom-go.v2/interfaces"
+	"github.com/buyandship/intercom-go/interfaces"
 )
 
 // A Client manages interacting with the Intercom API.
@@ -46,7 +46,7 @@ type Client struct {
 
 const (
 	defaultBaseURI = "https://api.intercom.io"
-	clientVersion  = "2.0.0"
+	clientVersion  = "2.11"
 )
 
 type option func(c *Client) option

@@ -8,13 +8,13 @@ import (
 func TestJobAPISaveUser(t *testing.T) {
 	http := TestJobHTTPClient{t: t, expectedURI: "/bulk/users", fixtureFilename: "fixtures/job.json"}
 	api := JobAPI{httpClient: &http}
-	user := User{UserID: "1234"}
+	user := User{ExternalID: "1234"}
 	job := JobRequest{Items: []*JobItem{NewUserJobItem(&user, JOB_POST)}, bulkType: "users"}
 	http.f = func(job *JobRequest) {
 		if job.Items[0].DataType != "user" {
 			t.Errorf("job item was of wrong data type, expected %s, was %s", "user", job.Items[0].DataType)
 		}
-		if job.Items[0].Data.(requestUser).UserID != "1234" {
+		if job.Items[0].Data.(requestUser).ExternalID != "1234" {
 			t.Errorf("wrong user id sent")
 		}
 	}

@@ -15,7 +15,7 @@ func (rum RequestUserMapper) ConvertUser(user *User) requestUser {
 		ID:                     user.ID,
 		Email:                  user.Email,
 		Phone:                  user.Phone,
-		UserID:                 user.UserID,
+		ExternalID:             user.ExternalID,
 		Name:                   user.Name,
 		SignedUpAt:             user.SignedUpAt,
 		RemoteCreatedAt:        user.RemoteCreatedAt,

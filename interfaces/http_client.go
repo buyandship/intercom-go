@@ -40,7 +40,7 @@ func (c IntercomHTTPClient) Get(url string, queryParams interface{}) ([]byte, er
 	req, _ := http.NewRequest("GET", *c.BaseURI+url, nil)
 	req.SetBasicAuth(c.AppID, c.APIKey)
 	req.Header.Add("Accept", "application/json")
-	req.Header.Add("User-Agent", c.UserAgentHeader())
+	req.Header.Add("Intercom-Version", *c.ClientVersion)
 	addQueryParams(req, queryParams)
 	if *c.Debug {
 		fmt.Printf("%s %s\n", req.Method, req.URL)
@@ -92,7 +92,7 @@ func (c IntercomHTTPClient) postOrPatch(method, url string, body interface{}) ([
 	req.SetBasicAuth(c.AppID, c.APIKey)
 	req.Header.Add("Accept", "application/json")
 	req.Header.Add("Content-Type", "application/json")
-	req.Header.Add("User-Agent", c.UserAgentHeader())
+	req.Header.Add("Intercom-Version", *c.ClientVersion)
 	if *c.Debug {
 		fmt.Printf("%s %s %s\n", req.Method, req.URL, buffer)
 	}

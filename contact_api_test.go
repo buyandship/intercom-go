@@ -15,8 +15,8 @@ func TestContactAPIFind(t *testing.T) {
 	if contact.Phone != "+1234567890" {
 		t.Errorf("Phone was %s, expected +1234567890", contact.Phone)
 	}
-	if contact.UserID != "123" {
-		t.Errorf("UserID was %s, expected 123", contact.UserID)
+	if contact.ExternalID != "123" {
+		t.Errorf("UserID was %s, expected 123", contact.ExternalID)
 	}
 }
 
@@ -61,18 +61,18 @@ func TestContactAPICreate(t *testing.T) {
 func TestContactAPIUpdate(t *testing.T) {
 	http := TestUserHTTPClient{fixtureFilename: "fixtures/contact.json", expectedURI: "/contacts", t: t}
 	api := ContactAPI{httpClient: &http}
-	contact := &Contact{UserID: "123", Email: "mycontact@example.io"}
+	contact := &Contact{ExternalID: "123", Email: "mycontact@example.io"}
 	api.update(contact)
 }
 
 func TestContactAPIConvert(t *testing.T) {
 	http := TestUserHTTPClient{fixtureFilename: "fixtures/user.json", expectedURI: "/contacts/convert", t: t}
 	api := ContactAPI{httpClient: &http}
-	contact := &Contact{UserID: "abc", Email: "mycontact@example.io"}
-	user := &User{UserID: "123"}
+	contact := &Contact{ExternalID: "abc", Email: "mycontact@example.io"}
+	user := &User{ExternalID: "123"}
 	returned, _ := api.convert(contact, user)
-	if returned.UserID != "123" {
-		t.Errorf("Expected UserID %s, got %s", "123", returned.UserID)
+	if returned.ExternalID != "123" {
+		t.Errorf("Expected UserID %s, got %s", "123", returned.ExternalID)
 	}
 }
 
@@ -81,7 +81,7 @@ func TestContactAPIDelete(t *testing.T) {
 	api := ContactAPI{httpClient: &http}
 	contact := &Contact{ID: "b123d"}
 	returned, _ := api.delete(contact.ID)
-	if returned.UserID != "123" {
-		t.Errorf("Expected UserID %s, got %s", "123", returned.UserID)
+	if returned.ExternalID != "123" {
+		t.Errorf("Expected UserID %s, got %s", "123", returned.ExternalID)
 	}
 }

@@ -15,8 +15,8 @@ func TestUserAPIFind(t *testing.T) {
 	if user.ID != "54c42e7ea7a765fa7" {
 		t.Errorf("ID was %s, expected 54c42e7ea7a765fa7", user.ID)
 	}
-	if user.UserID != "123" {
-		t.Errorf("UserID was %s, expected 123", user.UserID)
+	if user.ExternalID != "123" {
+		t.Errorf("UserID was %s, expected 123", user.ExternalID)
 	}
 	if user.Phone != "+12345678910" {
 		t.Errorf("Phone was %s, expected +12345678910", user.Phone)
@@ -88,7 +88,7 @@ func TestUserAPISave(t *testing.T) {
 			Company{ID: "5"},
 		},
 	}
-	user := User{UserID: "27", Companies: &companyList}
+	user := User{ExternalID: "27", Companies: &companyList}
 	api.save(&user)
 }
 
