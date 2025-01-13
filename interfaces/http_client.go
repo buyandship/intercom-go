@@ -16,6 +16,7 @@ type HTTPClient interface {
 	Post(string, interface{}) ([]byte, error)
 	Patch(string, interface{}) ([]byte, error)
 	Delete(string, interface{}) ([]byte, error)
+	Put(string, interface{}) ([]byte, error)
 }
 
 type IntercomHTTPClient struct {
@@ -75,6 +76,10 @@ func (c IntercomHTTPClient) Patch(url string, body interface{}) ([]byte, error) 
 
 func (c IntercomHTTPClient) Post(url string, body interface{}) ([]byte, error) {
 	return c.postOrPatch("POST", url, body)
+}
+
+func (c IntercomHTTPClient) Put(url string, body interface{}) ([]byte, error) {
+	return c.postOrPatch("PUT", url, body)
 }
 
 func (c IntercomHTTPClient) postOrPatch(method, url string, body interface{}) ([]byte, error) {
