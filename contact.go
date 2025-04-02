@@ -39,6 +39,7 @@ type Contact struct {
 	CustomAttributes       map[string]interface{} `json:"custom_attributes,omitempty"`
 	UpdateLastRequestAt    *bool                  `json:"update_last_request_at,omitempty"`
 	NewSession             *bool                  `json:"new_session,omitempty"`
+	SignedUpAt             int64                  `json:"signed_up_at,omitempty"`
 }
 
 type BasicContact struct {

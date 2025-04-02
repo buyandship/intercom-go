@@ -137,6 +137,7 @@ func (api ContactAPI) buildRequestContact(contact *Contact) requestUser {
 		Phone:                  contact.Phone,
 		ExternalID:             contact.ExternalID,
 		Name:                   contact.Name,
+		SignedUpAt:             contact.SignedUpAt,
 		LastRequestAt:          contact.LastRequestAt,
 		LastSeenIP:             contact.LastSeenIP,
 		UnsubscribedFromEmails: contact.UnsubscribedFromEmails,
